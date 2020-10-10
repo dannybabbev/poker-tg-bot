@@ -12,7 +12,7 @@ const groupID = process.env.GROUP_ID;
 const refreshIntervalSec = process.env.REFRESH_INTERVAL_SEC !== undefined ? process.env.REFRESH_INTERVAL_SEC : 10;
 
 let prevTablesRunning = 0;
-let perTablesWaitingForPlayers = 0;
+let prevTablesWaitingForPlayers = 0;
 let lastMessageSent = '';
 let lastMessageSentTime = new Date();
 
@@ -44,14 +44,14 @@ const alertGroup = (tables) => {
   // or if the message is the same wait at least 1h before repeating it
   const minFromLastMessageSent = (new Date() - lastMessageSentTime) / (1000 * 60);
   if (message !== ''
-    && (tablesRunning > prevTablesRunning || tablesWaitingForPlayers > perTablesWaitingForPlayers || minFromLastMessageSent >= 60) // If the number of tables has increased
+    && (tablesRunning > prevTablesRunning || tablesWaitingForPlayers > prevTablesWaitingForPlayers || minFromLastMessageSent >= 60) // If the number of tables has increased
     && (message !== lastMessageSent || minFromLastMessageSent >= 60)) {
     lastMessageSent = message;
     lastMessageSentTime = new Date();
     bot.sendMessage(groupID, `${message}${getRandMotivationPhrase()}`);
   }
 
-  perTablesWaitingForPlayers = tablesWaitingForPlayers;
+  prevTablesWaitingForPlayers = tablesWaitingForPlayers;
   prevTablesRunning = tablesRunning;
 }
 
