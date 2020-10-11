@@ -10,6 +10,7 @@ const motivationPhrases = ['Go play', 'Join in', 'Come get their money', 'Fishin
 const apiEndpoint = process.env.ENDPOINT !== undefined ? process.env.ENDPOINT : 'https://play.fair.poker/lobby-data';
 const groupID = process.env.GROUP_ID;
 const refreshIntervalSec = process.env.REFRESH_INTERVAL_SEC !== undefined ? process.env.REFRESH_INTERVAL_SEC : 10;
+const allowRepeatMessageAfterMin = process.env.ALLOW_REPEAT_MESSAGE_MIN !== undefined ? process.env.ALLOW_REPEAT_MESSAGE_MIN : 120;
 
 let prevTablesRunning = 0;
 let prevTablesWaitingForPlayers = 0;
@@ -40,14 +41,18 @@ const alertGroup = (tables) => {
       }
     });
 
+
   // Send a mesage if the message is different from the last sent one 
   // or if the message is the same wait at least 1h before repeating it
   const minFromLastMessageSent = (new Date() - lastMessageSentTime) / (1000 * 60);
   if (message !== ''
-    && (tablesRunning > prevTablesRunning || tablesWaitingForPlayers > prevTablesWaitingForPlayers || minFromLastMessageSent >= 60) // If the number of tables has increased
-    && (message !== lastMessageSent || minFromLastMessageSent >= 60)) {
+    && (tablesRunning > prevTablesRunning || tablesWaitingForPlayers > prevTablesWaitingForPlayers || minFromLastMessageSent >= allowRepeatMessageAfterMin)
+    && (message !== lastMessageSent || minFromLastMessageSent >= allowRepeatMessageAfterMin)) {
     lastMessageSent = message;
     lastMessageSentTime = new Date();
+
+    console.log('sending message', message);
+
     bot.sendMessage(groupID, `${message}${getRandMotivationPhrase()}`);
   }
 
